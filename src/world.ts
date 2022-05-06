@@ -1,6 +1,7 @@
+import { mapHeight, mapWidth } from "./constants"
 import { create2DArray } from "./game-of-life"
 
-const world = create2DArray<Entity | null>(16, 16, null)
+const world = create2DArray<Entity | null>(mapWidth, mapHeight, null)
 
 export const cellBorn = (x: number, y: number) => {
   // create the entity
@@ -42,6 +43,6 @@ export const cellLive = (x: number, y: number) => {
       myMaterial.roughness = 0.1
 
       //Assign the material to the entity
-      entity?.addComponentOrReplace(myMaterial)
+      entity.addComponentOrReplace(myMaterial)
     }
 }

@@ -115,7 +115,7 @@ export const createBoard = (width: number, height: number) => {
   return board
 }
 
-export const iterate = (board: Board, onChange: (lastState: number, newState: number, x: number, y: number)) => {
+export const iterate = (board: Board, onChange: (lastState: number, newState: number, x: number, y: number) => void) => {
   const newCells: Array<Array<number>> = create2DArray(board.width, board.height, 0)
   for (let y = 0; y < board.height; y++) {
     for (let x = 0; x < board.width; x++) {
