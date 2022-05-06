@@ -1,6 +1,8 @@
-# Decentraland scene
+# Conway Game of Life
 
-This folder contains all the necessary files to launch a Decentraland scene.
+A scene that implements the Conway Game of Life
+
+More info: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
 
 ## Try it out
 
