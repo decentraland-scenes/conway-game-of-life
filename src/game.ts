@@ -1,6 +1,6 @@
 import { Board } from './board'
 import { Cell } from './cell'
-import { initBoard, mapHeight, mapWidth } from './constants'
+import { gliderBoard, mwssBoard, mapHeight, mapWidth } from './constants'
 import {
   countNeighbor,
   createCell,
@@ -99,5 +99,5 @@ engine.addSystem({
   },
 })
 
-createBoard(initBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 8.0), new Vector3(8.0, 8.0, 0.1))
-createBoard(initBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 6.0), new Vector3(8.0, 8.0, 0.1))
+createBoard(gliderBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 8.0), new Vector3(8.0, 8.0, 0.1))
+createBoard(mwssBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 6.0), new Vector3(8.0, 8.0, 0.1))
