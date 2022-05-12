@@ -1,6 +1,6 @@
 {
   "display": {
-    "title": "DCL Scene",
+    "title": "Conway Game of Life",
     "description": "My new Decentraland project",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"

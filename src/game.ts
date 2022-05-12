@@ -1,21 +1,18 @@
 import { Board } from './board'
-import { Cell } from './cell'
 import { gliderBoard, mwssBoard, mapHeight, mapWidth } from './constants'
 import {
-  countNeighbor,
   createCell,
-  DEAD,
-  getEntityByCellPos,
-  getNextGenerationState,
   LIVE,
+  setCellAlive,
 } from './game-of-life'
+import { gameOfLifeSystem } from './game-of-life-system'
 
 const createBoard = (
-  initialBoard: Array<Array<number>>,
+  initialBoard: Array<Array<0 | 1>>,
   width: number,
   height: number,
   position: Vector3,
-  scale: Vector3
+  scale: Vector3,
 ) => {
   const boardEntity = new Entity()
   const board = new Board(width, height)
@@ -29,7 +26,7 @@ const createBoard = (
   boardEntity.addComponent(
     new Transform({
       position,
-      scale
+      scale,
     }),
   )
 
@@ -45,59 +42,28 @@ const createBoard = (
 
   for (let y = 0; y < width; y++) {
     for (let x = 0; x < height; x++) {
-      if (initialBoard[x][y] === LIVE) createCell(boardEntity, x, y)
-    }
-  }
-}
-
-const updateGameOfLife = (boardEntity: IEntity) => {
-  const group = engine.getComponentGroup(Cell, BoxShape, Transform)
-
-  const entities = group.entities.filter(
-    (entity) => entity.getParent() === boardEntity,
-  )
-
-  const board: Board = boardEntity.getComponent(Board)
-  const entitiesToCreate = []
-  const entitiesToDelete: IEntity[] = []
-  for (let y = 0; y < board.width; y++) {
-    for (let x = 0; x < board.height; x++) {
-      const count = countNeighbor(entities, x, y)
-
-      const entity = getEntityByCellPos(entities, x, y)
-      const currentState = entity ? LIVE : DEAD
-      const nextState = getNextGenerationState(count, currentState)
-
-      if (currentState === DEAD && nextState === LIVE) {
-        entitiesToCreate.push({ x, y })
-      } else if (currentState === LIVE && nextState === DEAD && entity) {
-        entitiesToDelete.push(entity)
+      const entity = createCell(boardEntity, x, y)
+      if (initialBoard[x][y] === LIVE) {
+        setCellAlive(entity)
       }
     }
   }
-
-  for (let entity of entitiesToDelete) {
-    engine.removeEntity(entity)
-  }
-
-  for (let coord of entitiesToCreate) {
-    createCell(boardEntity, coord.x, coord.y)
-  }
 }
 
-engine.addSystem({
-  update: (dt: number) => {
-    const group = engine.getComponentGroup(Board)
-    for (const entity of group.entities) {
-      updateGameOfLife(entity)
+engine.addSystem(gameOfLifeSystem)
 
-      const transform = entity.getComponent(Transform)
+createBoard(
+  gliderBoard,
+  mapWidth,
+  mapHeight,
+  new Vector3(8.0, 4.0, 8.0),
+  new Vector3(8.0, 8.0, 0.1),
+)
 
-      // mutate the rotation
-      transform.rotate(Vector3.Up(), dt * 10)
-    }
-  },
-})
-
-createBoard(gliderBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 8.0), new Vector3(8.0, 8.0, 0.1))
-createBoard(mwssBoard, mapWidth, mapHeight, new Vector3(8.0, 4.0, 6.0), new Vector3(8.0, 8.0, 0.1))
+createBoard(
+  mwssBoard,
+  mapWidth,
+  mapHeight,
+  new Vector3(8.0, 4.0, 6.0),
+  new Vector3(8.0, 8.0, 0.1),
+)

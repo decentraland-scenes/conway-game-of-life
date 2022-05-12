@@ -36,71 +36,79 @@ export const getNextGenerationState = (
 export const createCell = (parent: IEntity, x: number, y: number) => {
   const entity = new Entity()
 
-  const parentTransform = parent.getComponent(Transform)
-  const parentBoard = parent.getComponent(Board)
+  const board = parent.getComponent(Board)
+
+  board.grid[x][y] = entity
 
   const position = new Vector3(
-    (x / parentBoard.width) - 0.5,
-    (y / parentBoard.height) - 0.5,
+    x / board.width - 0.5,
+    y / board.height - 0.5,
     0.0,
   )
 
   const transform = new Transform({
     position,
-    scale: new Vector3(1.0 / parentBoard.width, 1.0 / parentBoard.height, 0.9),
+    scale: new Vector3(1.0 / board.width, 1.0 / board.height, 0.9),
   })
   entity.addComponent(transform)
-
-  const boxShape = new BoxShape()
-  boxShape.withCollisions = false
-  entity.addComponent(boxShape)
 
   entity.addComponent(new Cell(x, y))
 
   entity.setParent(parent)
   engine.addEntity(entity)
+
+  return entity
 }
 
-export const countNeighbor = (entities: IEntity[], x: number, y: number) => {
-  let count = 0
-
-  for (const entity of entities) {
-    const cell = entity.getComponent(Cell)
-
-    let diffX = Math.abs(x - cell.x)
-    let diffY = Math.abs(y - cell.y)
-
-    // Mirror
-    const board = entity.getParent()?.getComponent(Board)
-    if (board) {
-      diffX = diffX === board.width - 1 ? 1 : diffX
-      diffY = diffY === board.height - 1 ? 1 : diffY
-    }
-
-    if (
-      (diffX === 1 && diffY === 1) ||
-      (diffX === 0 && diffY === 1) ||
-      (diffX === 1 && diffY === 0)
-    ) {
-      ++count
-    }
-  }
-
-  return count
+export const setCellAlive = (entity: IEntity) => {
+  const boxShape = new BoxShape()
+  boxShape.withCollisions = false
+  entity.addComponent(boxShape)
+  entity.getComponent(Cell).alive = LIVE
 }
 
-export const getEntityByCellPos = (
-  entities: IEntity[],
-  x: number,
-  y: number,
-) => {
-  for (const entity of entities) {
-    const cell = entity.getComponent(Cell)
+export const setCellDead = (entity: IEntity) => {
+  entity.removeComponent(BoxShape)
+  entity.getComponent(Cell).alive = DEAD
+}
 
-    if (cell.x == x && cell.y == y) {
-      return entity
+type Coord = { x: number; y: number }
+const neighborCoordinates = (x: number, y: number): Coord[] => [
+  { x: x - 1, y: y - 1 },
+  { x: x, y: y - 1 },
+  { x: x + 1, y: y - 1 },
+  { x: x - 1, y: y },
+  { x: x + 1, y: y },
+  { x: x - 1, y: y + 1 },
+  { x: x, y: y + 1 },
+  { x: x + 1, y: y + 1 },
+]
+
+const neighborMirror = (board: Board, x: number, y: number): Coord[] => {
+  return neighborCoordinates(x, y).map((coord) => {
+    if (coord.x < 0) {
+      coord.x += board.width
+    } else if (coord.x >= board.width) {
+      coord.x -= board.width
     }
-  }
 
-  return null
+    if (coord.y < 0) {
+      coord.y += board.height
+    } else if (coord.y >= board.height) {
+      coord.y -= board.height
+    }
+
+    return coord
+  })
+}
+
+export const countNeighbor = (entity: IEntity) => {
+  const board = entity.getParent()!.getComponent(Board)
+  const cell = entity.getComponent(Cell)
+
+  const coords = neighborMirror(board, cell.x, cell.y)
+  return coords.filter(
+    (coord: Coord) =>
+      board.grid[coord.x][coord.y]?.getComponent(Cell).alive !== DEAD,
+  ).length
 }
